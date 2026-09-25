@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}Piwat Marketing OS &bull; แคมเปญโปรโมชัน & สมาชิกรอยัลตี{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <div style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: #fbbf24; background: rgba(251, 191, 36, 0.12); padding: 0.2rem 0.7rem; border-radius: 999px; margin-bottom: 0.5rem; letter-spacing: 0.05em;">
+        <i class="fa-solid fa-bullhorn"></i> Customer Growth & Loyalty
+    </div>
+    <h1 class="section-title">แดชบอร์ด <span class="text-gradient">การตลาดและสิทธิประโยชน์</span></h1>
+    <p style="color: var(--text-secondary); margin-top: 0.25rem;">
+        บริหารจัดการคูปองส่วนลดแบบไดนามิก และติดตามคะแนนสะสมของลูกค้าในระบบสมาชิก (Loyalty Rewards Program)
+    </p>
+</div>
+
+<!-- Marketing Metrics -->
+<div class="grid grid-3" style="margin-bottom: 2rem;">
+    <div class="card stat-widget" style="border-top: 3px solid #3b82f6; background: rgba(14, 21, 38, 0.8);">
+        <div class="stat-info">
+            <h4>คูปองแคมเปญที่เปิดใช้งาน</h4>
+            <div class="stat-value text-gradient">{{ active_coupons }}</div>
+        </div>
+        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.12); color: #60a5fa;">
+            <i class="fa-solid fa-ticket"></i>
+        </div>
+    </div>
+    
+    <div class="card stat-widget" style="border-top: 3px solid #06b6d4; background: rgba(14, 21, 38, 0.8);">
+        <div class="stat-info">
+            <h4>สมาชิกสะสมแต้มทั้งหมด</h4>
+            <div class="stat-value" style="color: #38bdf8;">{{ total_members }}</div>
+        </div>
+        <div class="stat-icon" style="background: rgba(6, 182, 212, 0.12); color: #38bdf8;">
+            <i class="fa-solid fa-users"></i>
+        </div>
+    </div>
+    
+    <div class="card stat-widget" style="border-top: 3px solid #f59e0b; background: rgba(14, 21, 38, 0.8);">
+        <div class="stat-info">
+            <h4>แต้มสะสมรวมในระบบ</h4>
+            <div class="stat-value" style="color: #fbbf24;">{{ total_points }}</div>
+        </div>
+        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.12); color: #fbbf24;">
+            <i class="fa-solid fa-award"></i>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-2" style="grid-template-columns: 1.5fr 1fr; gap: 1.75rem; align-items: start; margin-bottom: 2.5rem;">
+    
+    <!-- Active Coupons Table -->
+    <div>
+        <h2 style="font-size: 1.25rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; color: #f1f5f9;">
+            <i class="fa-solid fa-ticket-simple" style="color: #3b82f6;"></i> แคมเปญคูปองและเวาเชอร์
+        </h2>
+        
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>รหัสโค้ด</th>
+                        <th>มูลค่าส่วนลด</th>
+                        <th>ยอดซื้อขั้นต่ำ</th>
+                        <th>ระยะเวลาแคมเปญ</th>
+                        <th>สถานะ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for coupon in coupons %}
+                        <tr>
+                            <td>
+                                <span style="font-family: monospace; font-size: 0.95rem; font-weight: 700; color: #93c5fd; background: rgba(59, 130, 246, 0.12); border: 1px dashed rgba(59, 130, 246, 0.4); padding: 0.25rem 0.65rem; border-radius: 6px; display: inline-block;">
+                                    {{ coupon.code }}
+                                </span>
+                            </td>
+                            <td style="font-weight: 600; color: #34d399;">
+                                {% if coupon.discount_type == 'percentage' %}
+                                    ลด {{ coupon.value|floatformat:0 }}%
+                                {% else %}
+                                    ลด ฿{{ coupon.value|floatformat:2 }}
+                                {% endif %}
+                            </td>
+                            <td style="color: var(--text-secondary); font-size: 0.88rem;">฿{{ coupon.min_purchase|floatformat:2 }}</td>
+                            <td style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4;">
+                                {{ coupon.start_date|date:"d M H:i" }} &bull; {{ coupon.end_date|date:"d M Y H:i" }}
+                            </td>
+                            <td>
+                                {% if coupon.active %}
+                                    <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> ใช้งานอยู่</span>
+                                {% else %}
+                                    <span class="badge badge-danger"><i class="fa-solid fa-ban"></i> ปิดใช้งาน</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--text-tertiary); padding: 2.5rem;">
+                                <i class="fa-solid fa-ticket" style="font-size: 2.5rem; margin-bottom: 0.75rem; display: block; opacity: 0.4;"></i>
+                                ยังไม่มีคูปองส่วนลดในระบบ
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Create Coupon Form -->
+    <div class="card" style="border: 1px solid rgba(59, 130, 246, 0.25); background: rgba(14, 21, 38, 0.85);">
+        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; color: #60a5fa;">
+            <i class="fa-solid fa-plus"></i> ออกรหัสคูปองส่วนลดใหม่
+        </h3>
+        
+        <form action="{% url 'marketing:dashboard' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_coupon">
+            
+            <div class="form-group">
+                <label class="form-label" for="coup_code">รหัสโปรโมชัน (Promo Code)</label>
+                <input type="text" id="coup_code" name="code" class="form-control" placeholder="เช่น FESTIVE20" required style="text-transform: uppercase;">
+            </div>
+            
+            <div class="grid grid-2" style="gap: 0.65rem;">
+                <div class="form-group">
+                    <label class="form-label" for="coup_type">ประเภทส่วนลด</label>
+                    <select id="coup_type" name="discount_type" class="form-control" required>
+                        <option value="percentage">เปอร์เซ็นต์ (%)</option>
+                        <option value="fixed">จำนวนเงินคงที่ (บาท)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="coup_val">มูลค่าที่ลด</label>
+                    <input type="number" id="coup_val" name="value" class="form-control" step="0.01" min="1" placeholder="เช่น 15 หรือ 500" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="coup_min">ยอดซื้อขั้นต่ำ (บาท)</label>
+                <input type="number" id="coup_min" name="min_purchase" class="form-control" step="0.01" min="0" value="0" placeholder="0.00" required>
+            </div>
+            
+            <div class="grid grid-2" style="gap: 0.65rem; margin-bottom: 1.25rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" for="coup_start">เริ่มใช้งาน</label>
+                    <input type="datetime-local" id="coup_start" name="start_date" class="form-control" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" for="coup_end">สิ้นสุดการใช้งาน</label>
+                    <input type="datetime-local" id="coup_end" name="end_date" class="form-control" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <i class="fa-solid fa-paper-plane"></i> เปิดใช้งานคูปอง
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="grid grid-2" style="grid-template-columns: 1.5fr 1fr; gap: 1.75rem; align-items: start;">
+    
+    <!-- Loyalty Members Table -->
+    <div>
+        <h2 style="font-size: 1.25rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; color: #f1f5f9;">
+            <i class="fa-solid fa-id-card-clip" style="color: #38bdf8;"></i> รายชื่อสมาชิกสะสมคะแนน (Loyalty Tier List)
+        </h2>
+        
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ชื่อสมาชิก</th>
+                        <th>เบอร์โทรศัพท์</th>
+                        <th style="text-align: center;">คะแนนสะสม (Points)</th>
+                        <th>ระดับสมาชิก (Tier)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in members %}
+                        <tr>
+                            <td style="font-weight: 600; color: #f8fafc;">{{ member.customer_name }}</td>
+                            <td style="font-family: monospace; font-size: 0.88rem; color: #94a3b8;">{{ member.phone }}</td>
+                            <td style="text-align: center; font-weight: 700; color: #fbbf24; font-size: 1.05rem;">
+                                <i class="fa-solid fa-star" style="font-size: 0.8rem; margin-right: 0.2rem;"></i> {{ member.points }}
+                            </td>
+                            <td>
+                                {% if member.points >= 1500 %}
+                                    <span class="badge" style="background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; font-weight: 800;">
+                                        <i class="fa-solid fa-crown"></i> Platinum
+                                    </span>
+                                {% elif member.points >= 500 %}
+                                    <span class="badge" style="background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%); color: #fff; font-weight: 800;">
+                                        <i class="fa-solid fa-gem"></i> Gold
+                                    </span>
+                                {% else %}
+                                    <span class="badge" style="background: rgba(255,255,255,0.08); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.15);">
+                                        Silver
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: var(--text-tertiary); padding: 2.5rem;">
+                                ไม่พบข้อมูลสมาชิกในระบบ
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Register Member Form -->
+    <div class="card" style="border: 1px solid rgba(245, 158, 11, 0.25); background: rgba(14, 21, 38, 0.85);">
+        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; color: #fbbf24;">
+            <i class="fa-solid fa-user-plus"></i> สมัครสมาชิกสะสมแต้มใหม่
+        </h3>
+        
+        <form action="{% url 'marketing:dashboard' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_member">
+            
+            <div class="form-group">
+                <label class="form-label" for="mem_name">ชื่อ-นามสกุล สมาชิก</label>
+                <input type="text" id="mem_name" name="customer_name" class="form-control" placeholder="เช่น กิตติศักดิ์ พัฒนกุล" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="mem_phone">หมายเลขโทรศัพท์มือถือ</label>
+                <input type="tel" id="mem_phone" name="phone" class="form-control" placeholder="เช่น 0898765432" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="mem_points">คะแนนเริ่มต้น (Points)</label>
+                <input type="number" id="mem_points" name="points" class="form-control" min="0" value="100" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);">
+                <i class="fa-solid fa-id-card"></i> บันทึกข้อมูลสมาชิก
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

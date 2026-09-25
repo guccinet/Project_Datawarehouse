@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Piwat DataCommerce OS{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <header>
+        <div class="navbar">
+            <a href="{% url 'sale:index' %}" class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <span class="brand-text">Piwat</span>
+                <span style="font-size: 0.65rem; text-transform: uppercase; background: rgba(59,130,246,0.18); border: 1px solid rgba(59,130,246,0.35); color: #60a5fa; padding: 2px 8px; border-radius: 999px; margin-left: 2px; font-weight: 700; letter-spacing: 0.06em;">OS</span>
+            </a>
+            
+            <ul class="nav-links">
+                <!-- Navigation menu tabs -->
+                <li class="{% if request.path == '/' or 'sale' in request.path %}active{% endif %}">
+                    <a href="{% url 'sale:index' %}">
+                        <i class="fa-solid fa-bag-shopping"></i> หน้าร้านค้า
+                    </a>
+                </li>
+                <li class="{% if 'inventory' in request.path %}active{% endif %}">
+                    <a href="{% url 'inventory:dashboard' %}">
+                        <i class="fa-solid fa-warehouse"></i> สต็อกสินค้า
+                    </a>
+                </li>
+                <li class="{% if 'marketing' in request.path %}active{% endif %}">
+                    <a href="{% url 'marketing:dashboard' %}">
+                        <i class="fa-solid fa-ticket"></i> แคมเปญการตลาด
+                    </a>
+                </li>
+                <li class="{% if 'logistics' in request.path %}active{% endif %}">
+                    <a href="{% url 'logistics:dashboard' %}">
+                        <i class="fa-solid fa-truck-ramp-box"></i> ขนส่ง & พัสดุ
+                    </a>
+                </li>
+                <li class="{% if 'analytics' in request.path %}active{% endif %}">
+                    <a href="{% url 'analytics:dashboard' %}">
+                        <i class="fa-solid fa-chart-pie"></i> ข้อมูลวิเคราะห์
+                    </a>
+                </li>
+            </ul>
+
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div class="status-indicator">
+                    <span class="pulse-dot"></span>
+                    <span>DW Active</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-warning{% endif %}">
+                    {% if message.tags == 'success' %}
+                        <i class="fa-solid fa-circle-check"></i>
+                    {% elif message.tags == 'error' %}
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    {% else %}
+                        <i class="fa-solid fa-circle-info"></i>
+                    {% endif %}
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer style="margin-top: auto; border-top: 1px solid var(--border-subtle); padding: 2rem 0; background: rgba(7, 11, 20, 0.85); backdrop-filter: blur(10px);">
+        <div style="max-width: 1340px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <p style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">
+                    Piwat DataCommerce OS &bull; Enterprise Data Warehouse
+                </p>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                    Medallion Lakehouse Pipeline (Bronze &rarr; Silver &rarr; Gold) &bull; Django &bull; Airflow &bull; Superset
+                </p>
+            </div>
+            <div style="font-size: 0.82rem; color: var(--text-tertiary);">
+                &copy; 2026 Piwat. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

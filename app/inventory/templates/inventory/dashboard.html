@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+
+{% block title %}Piwat Inventory OS &bull; การจัดการคลังและสต็อกสินค้า{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <div style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.12); padding: 0.2rem 0.7rem; border-radius: 999px; margin-bottom: 0.5rem; letter-spacing: 0.05em;">
+            <i class="fa-solid fa-warehouse"></i> Warehouse Fulfillment
+        </div>
+        <h1 class="section-title">แดชบอร์ด <span class="text-gradient">ระบบบริหารจัดการคลังสินค้า</span></h1>
+        <p style="color: var(--text-secondary); margin-top: 0.25rem;">
+            ติดตามปริมาณสต็อกแบบ Real-time จัดสรรพื้นที่จัดเก็บในโซนคลัง และเฝ้าระวังจุดสั่งซื้อซ้ำ (Reorder Point)
+        </p>
+    </div>
+</div>
+
+<!-- Key Inventory Metrics -->
+<div class="grid grid-3" style="margin-bottom: 2rem;">
+    <div class="card stat-widget" style="border-top: 3px solid #3b82f6; background: rgba(14, 21, 38, 0.8);">
+        <div class="stat-info">
+            <h4>จำนวนประเภทสินค้า (Active SKUs)</h4>
+            <div class="stat-value text-gradient">{{ sku_count }}</div>
+        </div>
+        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.12); color: #60a5fa;">
+            <i class="fa-solid fa-barcode"></i>
+        </div>
+    </div>
+    
+    <div class="card stat-widget" style="border-top: 3px solid #10b981; background: rgba(14, 21, 38, 0.8);">
+        <div class="stat-info">
+            <h4>สินค้าพร้อมส่งในคลัง (Units)</h4>
+            <div class="stat-value" style="color: #34d399;">{{ total_items }}</div>
+        </div>
+        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.12); color: #34d399;">
+            <i class="fa-solid fa-boxes-stacked"></i>
+        </div>
+    </div>
+    
+    <div class="card stat-widget" style="border-top: 3px solid {% if low_stock_count > 0 %}#ef4444{% else %}#10b981{% endif %}; background: rgba(14, 21, 38, 0.8);">
+        <div class="stat-info">
+            <h4>รายการแจ้งเตือนสต็อกต่ำ</h4>
+            <div class="stat-value" style="color: {% if low_stock_count > 0 %}#f87171{% else %}#34d399{% endif %};">
+                {{ low_stock_count }}
+            </div>
+        </div>
+        <div class="stat-icon" style="background: {% if low_stock_count > 0 %}rgba(239, 68, 68, 0.12){% else %}rgba(16, 185, 129, 0.12){% endif %}; color: {% if low_stock_count > 0 %}#f87171{% else %}#34d399{% endif %};">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-2" style="grid-template-columns: 2fr 1.25fr; align-items: start; gap: 1.75rem; margin-bottom: 2.5rem;">
+    
+    <!-- Inventory Stock Table -->
+    <div>
+        <h2 style="font-size: 1.25rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; color: #f1f5f9;">
+            <i class="fa-solid fa-list-check" style="color: #3b82f6;"></i> บัญชีสต็อกสินค้าคงคลังปัจจุบัน
+        </h2>
+        
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ข้อมูลสินค้า & SKU</th>
+                        <th>ราคาขาย / ทุน</th>
+                        <th>ตำแหน่งคลัง</th>
+                        <th style="text-align: center;">คงเหลือ</th>
+                        <th style="text-align: center;">สถานะความพร้อม</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stock in stock_levels %}
+                        <tr>
+                            <td>
+                                <div style="font-weight: 600; color: #f8fafc; font-size: 0.92rem;">{{ stock.product.name }}</div>
+                                <div style="font-size: 0.78rem; font-family: monospace; color: #94a3b8;">{{ stock.product.sku }}</div>
+                            </td>
+                            <td>
+                                <div style="font-size: 0.88rem; font-weight: 600; color: #38bdf8;">฿{{ stock.product.price|floatformat:2 }}</div>
+                                <div style="font-size: 0.76rem; color: var(--text-tertiary);">ต้นทุน: ฿{{ stock.product.cost|floatformat:2 }}</div>
+                            </td>
+                            <td>
+                                <span style="font-family: monospace; font-size: 0.85rem; background: rgba(59, 130, 246, 0.12); color: #93c5fd; padding: 0.25rem 0.6rem; border-radius: 6px; border: 1px solid rgba(59, 130, 246, 0.25);">
+                                    <i class="fa-solid fa-location-dot" style="font-size: 0.75rem;"></i> {{ stock.location }}
+                                </span>
+                            </td>
+                            <td style="text-align: center; font-weight: 800; font-size: 1.15rem; color: {% if stock.is_low_stock %}#f87171{% else %}#f1f5f9{% endif %};">
+                                {{ stock.quantity }}
+                                <div style="font-size: 0.72rem; font-weight: 400; color: var(--text-tertiary); margin-top: 0.1rem;">เกณฑ์เตือน: {{ stock.reorder_point }}</div>
+                            </td>
+                            <td style="text-align: center;">
+                                {% if stock.is_low_stock %}
+                                    <span class="badge badge-danger"><i class="fa-solid fa-triangle-exclamation"></i> สต็อกต่ำ</span>
+                                {% else %}
+                                    <span class="badge badge-success"><i class="fa-solid fa-check"></i> พร้อมจำหน่าย</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--text-tertiary); padding: 3rem;">
+                                <i class="fa-solid fa-box-open" style="font-size: 2.5rem; margin-bottom: 0.75rem; display: block; opacity: 0.4;"></i>
+                                ไม่พบรายการสต็อกสินค้าในฐานข้อมูล
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Management Actions Column -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- Stock Inbound Form -->
+        {% if products.exists %}
+        <div class="card" style="border: 1px solid rgba(16, 185, 129, 0.25); background: rgba(14, 21, 38, 0.85);">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; color: #34d399;">
+                <i class="fa-solid fa-dolly"></i> บันทึกรับสินค้าเข้าคลัง (Inbound Entry)
+            </h3>
+            
+            <form action="{% url 'inventory:dashboard' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_stock">
+                
+                <div class="form-group">
+                    <label class="form-label" for="product_select">เลือกสินค้าเป้าหมาย</label>
+                    <select id="product_select" name="product_id" class="form-control" required>
+                        {% for product in products %}
+                            <option value="{{ product.id }}">{{ product.name }} ({{ product.sku }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="stock_qty">จำนวนที่นำเข้าสต็อก (ชิ้น)</label>
+                    <input type="number" id="stock_qty" name="quantity" class="form-control" min="1" placeholder="เช่น 25" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="stock_reason">เอกสารอ้างอิง / หมายเหตุการรับ</label>
+                    <input type="text" id="stock_reason" name="reason" class="form-control" placeholder="เช่น รับตามใบสั่งซื้อ PO-2026-09" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; background: linear-gradient(135deg, #059669 0%, #10b981 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
+                    <i class="fa-solid fa-plus-circle"></i> ยืนยันการรับเข้าสต็อก
+                </button>
+            </form>
+        </div>
+        {% endif %}
+        
+        <!-- Register New Product Form -->
+        <div class="card" style="border: 1px solid rgba(59, 130, 246, 0.25); background: rgba(14, 21, 38, 0.85);">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; color: #60a5fa;">
+                <i class="fa-solid fa-square-plus"></i> เพิ่มทะเบียนสินค้าใหม่ (New SKU)
+            </h3>
+            
+            <form action="{% url 'inventory:dashboard' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_product">
+                
+                <div class="form-group">
+                    <label class="form-label" for="prod_name">ชื่อรุ่นสินค้า</label>
+                    <input type="text" id="prod_name" name="name" class="form-control" placeholder="เช่น ASUS ROG Strix Monitor" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="prod_sku">รหัส SKU</label>
+                    <input type="text" id="prod_sku" name="sku" class="form-control" placeholder="เช่น PWT-MON-01" required style="text-transform: uppercase;">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="prod_desc">คำอธิบายสเปกสินค้า</label>
+                    <input type="text" id="prod_desc" name="description" class="form-control" placeholder="เช่น จอเกมมิ่ง 27 นิ้ว 240Hz Fast-IPS">
+                </div>
+                
+                <div class="grid grid-2" style="gap: 0.65rem; margin-bottom: 0.75rem;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label" for="prod_cost">ราคาทุน (฿)</label>
+                        <input type="number" id="prod_cost" name="cost" class="form-control" step="0.01" min="0" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label" for="prod_price">ราคาขาย (฿)</label>
+                        <input type="number" id="prod_price" name="price" class="form-control" step="0.01" min="0" placeholder="0.00" required>
+                    </div>
+                </div>
+                
+                <div class="grid grid-3" style="gap: 0.5rem; margin-bottom: 1.25rem;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label" for="prod_stock">สต็อกแรก</label>
+                        <input type="number" id="prod_stock" name="initial_stock" class="form-control" min="0" value="10" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label" for="prod_loc">โซนชั้นวาง</label>
+                        <input type="text" id="prod_loc" name="location" class="form-control" value="Zone-A3" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label" for="prod_alert">เตือนสั่งซื้อ</label>
+                        <input type="number" id="prod_alert" name="reorder_point" class="form-control" min="1" value="3" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fa-solid fa-check"></i> บันทึกทะเบียนสินค้า
+                </button>
+            </form>
+        </div>
+        
+    </div>
+</div>
+
+<!-- Stock Audit Trail -->
+<div style="margin-top: 1rem;">
+    <h2 style="font-size: 1.25rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; color: #f1f5f9;">
+        <i class="fa-solid fa-clock-rotate-left" style="color: #38bdf8;"></i> ประวัติการเคลื่อนไหวสต็อกสินค้า (Audit Trail)
+    </h2>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>วัน-เวลาทำรายการ</th>
+                    <th>สินค้า & SKU</th>
+                    <th>ประเภทธุรกรรม</th>
+                    <th style="text-align: center;">ปริมาณเปลี่ยนแปลง</th>
+                    <th>บันทึกเหตุผล</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in stock_logs %}
+                    <tr>
+                        <td style="color: var(--text-secondary); font-size: 0.82rem; font-family: monospace;">{{ log.created_at|date:"d M Y H:i:s" }}</td>
+                        <td style="font-weight: 600; color: #f8fafc;">{{ log.product.name }} <span style="font-size: 0.78rem; color: #94a3b8; font-weight: normal;">({{ log.product.sku }})</span></td>
+                        <td>
+                            {% if log.log_type == 'inbound' %}
+                                <span class="badge badge-success"><i class="fa-solid fa-arrow-down"></i> {{ log.get_log_type_display }}</span>
+                            {% elif log.log_type == 'outbound' %}
+                                <span class="badge badge-info"><i class="fa-solid fa-arrow-up"></i> {{ log.get_log_type_display }}</span>
+                            {% else %}
+                                <span class="badge badge-warning"><i class="fa-solid fa-pen"></i> {{ log.get_log_type_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center; font-weight: 800; font-family: monospace; font-size: 1.05rem; color: {% if log.change_quantity > 0 %}#34d399{% else %}#f87171{% endif %};">
+                            {% if log.change_quantity > 0 %}+{% endif %}{{ log.change_quantity }} ชิ้น
+                        </td>
+                        <td style="color: var(--text-secondary); font-size: 0.88rem;">{{ log.reason|default:"-" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-tertiary); padding: 2.5rem;">ยังไม่มีประวัติการปรับปรุงสต็อกในระบบ</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
